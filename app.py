@@ -20,4 +20,5 @@ def update_layout(tab_name):
 
 
 if __name__ == "__main__":
+    app.title = "BSM Option Pricer"
     app.run()

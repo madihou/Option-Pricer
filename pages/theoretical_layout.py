@@ -13,13 +13,11 @@ def create_theoretical_layout():
         dbc.Row([
             dbc.Col([
                 dbc.Card([
-                    dbc.CardHeader(children="Call :"),
                     dbc.CardBody(id="call_result")
                 ])
             ]),
             dbc.Col([
                 dbc.Card([
-                    dbc.CardHeader(children="Put :"),
                     dbc.CardBody(id="put_result")
                 ])
             ])
@@ -47,9 +45,27 @@ def compute_bsm(s0: float, K: float, T: int, r: float, sigma: float, _: int):
     c, p = bsm.compute_option_price()
     spot_sim = bsm.simulate_spot_price(10)
 
-    call_result = [html.P(f"{c:.2f}")]
-    put_result = [html.P(f"{p:.2f}")]
-    graph_result = [dcc.Graph(figure=draw_spot_simulation(spot_sim, T))]
+    call_result = [html.P(f"${c:.2f}")]
+    put_result = [html.P(f"${p:.2f}")]
+    graph_result = [
+        html.Br(),
+        dbc.Row([
+            dbc.Col([
+                dbc.Card(
+                    dbc.CardBody([
+                        dcc.Graph()
+                    ])
+                )
+            ]),
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardBody([
+                        dcc.Graph()
+                    ])
+                ])
+            ])
+        ])
+    ]
 
     return call_result, put_result, graph_result
 

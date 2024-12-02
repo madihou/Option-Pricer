@@ -33,7 +33,7 @@ content = html.Div(
         html.Hr(),
         dcc.Tabs([
             dcc.Tab(label="Theoretical", id="theoretical_tab", value="theoretical"),
-            dcc.Tab(label="Real time", id="real_time_tab", value="real_time")
+            dcc.Tab(label="Delta Hedge Simulation", id="real_time_tab", value="real_time")
         ], value="theoretical", id="content_tabs"),
         html.Div(id="page_content")
     ],
