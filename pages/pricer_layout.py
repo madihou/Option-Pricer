@@ -6,9 +6,9 @@ import dash_bootstrap_components as dbc
 from dash import Input, State, Output, dcc, html, callback
 
 
-def create_theoretical_layout():
+def create_pricer_layout():
 
-    layout = [html.Div([
+    content_layout = [html.Div([
         html.Br(),
         dbc.Row([
             dbc.Col([
@@ -24,8 +24,47 @@ def create_theoretical_layout():
         ]),
         html.Div(id="bsm_graph")
     ])]
+    
+    sidebar_layout = [
+            html.H3("BSM Parameters", className="display-9"),
+            html.Hr(),
+            html.H6("Spot :"),
+            dbc.Input(id="spot_input", type="number"),
+            html.Br(),
+            html.H6("Strike:"),
+            dbc.Input(id="strike_input", type="number"),
+            html.Br(),
+            html.H6("Maturity:"),
+            dbc.Input(id="maturity_input", type="number"),
+            html.Br(),
+            html.H6("Interest rate:"),
+            dbc.Input(id="rate_input", type="number", max=1, min=0, step=.01),
+            html.Br(),
+            html.H6("Volatility:"),
+            dcc.Slider(id="volatility_slider", value=0, min=0, max=100,
+                       tooltip={"always_visible": True, "template": "{value}%"}),
+            dbc.Button(id="compute_button", children="Compute !"),
+            html.Hr(),
+            html.H3("Spot-Volatility Heat Map", className="display-9"),
+            html.Br(),
+            dbc.Row([
+                dbc.Col([
+                    html.P("Heat map size :")
+                ]),
+                dbc.Col([
+                    dbc.Input(id="hm_size", type="number", min=5)
+                ]),
+            ]),
+            html.Br(),
+            html.H6("Spot price range :"),
+            dcc.RangeSlider(0, 20, 1, value=[5, 15], id="spot_range"),
+            html.Br(),
+            html.H6("Volatility range :"),
+            dcc.RangeSlider(0, 20, 1, value=[5, 15], id="volatility_range")
 
-    return layout
+    ]
+    
+    return content_layout, sidebar_layout
 
 
 @callback(
@@ -43,7 +82,6 @@ def create_theoretical_layout():
 def compute_bsm(s0: float, K: float, T: int, r: float, sigma: float, _: int):
     bsm = BSM(s0, K, T, r, sigma/100)
     c, p = bsm.compute_option_price()
-    spot_sim = bsm.simulate_spot_price(10)
 
     call_result = [html.P(f"${c:.2f}")]
     put_result = [html.P(f"${p:.2f}")]
