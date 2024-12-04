@@ -1,13 +1,15 @@
+import dash_mantine_components as dmc
 import dash_bootstrap_components as dbc
 from component.app_layout import sidebar, content
-from dash import Dash, Input, Output, dcc, html, callback
+from dash import Dash, Input, Output, dcc, html, callback, _dash_renderer
 from pages.pricer_layout import create_pricer_layout
+from pages.delta_sim import create_delta_sim_layout
+_dash_renderer._set_react_version("18.2.0")
 
 
+app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP] + dmc.styles.ALL)
 
-app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
-
-app.layout = html.Div([sidebar, content])
+app.layout = dmc.MantineProvider(html.Div([sidebar, content]))
 
 
 @callback(
@@ -18,8 +20,10 @@ app.layout = html.Div([sidebar, content])
 def update_layout(tab_name):
     if tab_name == "pricer":
         return create_pricer_layout()
+    if tab_name == "delta_sim":
+        return create_delta_sim_layout()
 
 
 if __name__ == "__main__":
     app.title = "BSM Option Pricer"
-    app.run()
+    app.run()#debug=True)

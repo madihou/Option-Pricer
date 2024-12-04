@@ -9,7 +9,7 @@ class DataManager:
             pickle.dump(obj, f)
 
     @staticmethod
-    def read_data():
+    def load_data():
         with open("data.pickle", 'rb') as f:
             data = pickle.load(f)
         return data

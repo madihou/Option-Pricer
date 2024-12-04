@@ -18,6 +18,8 @@ class BSM:
         self.volatility = None
         self._d1 = None
         self._d2 = None
+        self.price = None
+        self.period = None
         self._initialized = False
 
     def initialize_bsm(self, spot: float, strike: float, maturity: float, risk_free_rate: float, volatility: float) -> None:
@@ -54,30 +56,34 @@ class BSM:
         self._initialized = True
 
     @staticmethod
-    def _compute_stochastic_integral(t: float, n: int) -> ndarray[Any, dtype[Any]]:
+    def _compute_stochastic_integral(dt, n: int) -> ndarray[Any, dtype[Any]]:
         """
         Simulate a stochastic integral using the Euler-Maruyama numerical method.
         Args:
-            t (float): Time period for the simulation.
+            dt : Time period for the simulation.
             n (int): Number of time steps in the discretization.
 
         Return:
             np.ndarray: A 1D array of simulated values representing the stochastic process.
         """
-        dt = t / n
 
-        dw = np.random.randn(n) * np.sqrt(dt)
+        dw = np.random.randn(n+1) * np.sqrt(dt)
         w = np.cumsum(dw)
         return w
 
-    def _compute_spot_price(self):
+    def compute_spot_price(self, timescale: str, n: int):
         """
 
         """
-        s = self.spot * np.exp(
-            (self.risk_free - .5 * self.volatility ** 2) + self.volatility * self._compute_stochastic_integral(
-                self.maturity, 1000))
-        return s
+        scale = {"Daily": 1/252, "Weekly": 1/52, "Year": 1}
+        self.period = np.arange(n+1) * scale[timescale]
+        dt = np.concat(([0], np.diff(self.period)))
+        if not self._initialized:
+            logger.error("Model not initialized. Please initialize a model with the required parameters.")
+        else:
+            self.price = self.spot * np.exp(
+                (self.risk_free - .5 * self.volatility ** 2) * self.period + self.volatility * self._compute_stochastic_integral(
+                    dt, n))
 
     def compute_option_price(self) -> tuple[float, float]:
         """
@@ -113,7 +119,7 @@ class BSM:
         return S
 
     @staticmethod
-    def _compute_d(s0: float, K: float, r: float, T: float, sigma: float, is_d1=True) -> float:
+    def _compute_d(s0: float | np.ndarray, K: float, r: float, T: float | np.ndarray, sigma: float, is_d1=True) -> float:
         """
 
         """
@@ -133,3 +139,25 @@ class BSM:
             return s0 * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
         else:
             return K * np.exp(-r * T) * norm.cdf(-d2) - s0 * norm.cdf(-d1)
+
+    def compute_greeks(self):
+        pass
+
+    def compute_delta(self, s0: float | np.ndarray, K: float, r: float, T: float | np.ndarray, sigma: float, is_call=True):
+        d1 = self._compute_d(s0, K, self.maturity - T, r, sigma)
+        if is_call:
+            return norm.cdf(d1)
+        else:
+            return norm.cdf(d1) - 1
+
+    def compute_gamma(self):
+        pass
+
+    def compute_theta(self):
+        pass
+
+    def compute_vega(self):
+        pass
+
+    def compute_rho(self):
+        pass

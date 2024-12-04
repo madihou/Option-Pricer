@@ -1,8 +1,11 @@
 from BSM import BSM
+from utils.data import DataManager
 import numpy as np
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 from dash import Input, State, Output, dcc, html, callback
+
+data = DataManager()
 
 
 def create_pricer_layout():
@@ -27,7 +30,7 @@ def create_pricer_layout():
     sidebar_layout = [
             html.H3("BSM Parameters", className="display-9"),
             html.Hr(),
-            html.H6("Spot :"),
+            html.H6("Spot:"),
             dbc.Input(id="spot_input", type="number"),
             html.Br(),
             html.H6("Strike:"),
@@ -36,7 +39,7 @@ def create_pricer_layout():
             html.H6("Maturity:"),
             dbc.Input(id="maturity_input", type="number"),
             html.Br(),
-            html.H6("Interest rate:"),
+            html.H6("Risk-free rate:"),
             dbc.Input(id="rate_input", type="number", max=1, min=0, step=.01),
             html.Br(),
             html.H6("Volatility:"),
@@ -59,8 +62,7 @@ def create_pricer_layout():
             dcc.RangeSlider(0, 0, 1, value=[0, 0], id="spot_range"),
             html.Br(),
             html.H6("Volatility range :"),
-            dcc.RangeSlider(0, 0, .01, value=[0, 0], id="volatility_range"),
-            dbc.Button(id="update_map_button", children="Update Heat Map")
+            dcc.RangeSlider(0, 0, .01, value=[0, 0], id="volatility_range")
 
     ]
     
@@ -119,25 +121,22 @@ def run_bsm(s0: int, K: int, T: int, r: float, sigma: float, _: int):
             ])
         ])
     ]
-
+    data.dump_data(bsm)
     return call_result, put_result, graph_result, spot_range[0], spot_range[1], spot_range, volatility_range[0], volatility_range[1], volatility_range
 
 
 @callback(
     Output("call_map", "figure"),
     Output("put_map", "figure"),
-    State("hm_size", "value"),
-    State("spot_range", "value"),
-    State("strike_input", "value"),
-    State("maturity_input", "value"),
-    State("rate_input", "value"),
-    State("volatility_range", "value"),
-    Input("update_map_button", "n_clicks"),
+    Input("hm_size", "value"),
+    Input("spot_range", "value"),
+    Input("volatility_range", "value"),
     prevent_initial_call=True,
 
 )
-def update_heat_maps(n: int, spot_range: list[int], K: int, T: int, r: float, sigma_range: list[float], _: int):
-    call_map_fig, put_map_fig = draw_options_heat_maps(n, spot_range, sigma_range, T, K, r)
+def update_heat_maps(n: int, spot_range: list[int], sigma_range: list[float]):
+    bsm = data.load_data()
+    call_map_fig, put_map_fig = draw_options_heat_maps(n, spot_range, sigma_range, bsm.maturity, bsm.strike, bsm.risk_free)
 
     return call_map_fig, put_map_fig
 

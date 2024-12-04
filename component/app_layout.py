@@ -15,7 +15,7 @@ content = html.Div(
         dcc.Tabs([
             dcc.Tab(label="Pricer", id="theoretical_tab", value="pricer"),
             dcc.Tab(label="Greeks", id="greeks", value="greeks"),
-            dcc.Tab(label="Delta Hedge Simulation", id="delta_sim", value="delat_sim"),
+            dcc.Tab(label="Delta Hedge Simulation", id="delta_sim", value="delta_sim"),
         ], value="pricer", id="content_tabs"),
         html.Div(id="page_content")
     ],
