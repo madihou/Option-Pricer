@@ -1,7 +1,11 @@
 import logging
+from typing import Any
 import numpy as np
-import pandas as pd
+from numpy import ndarray, dtype
 from scipy.stats import norm
+
+logger = logging.getLogger("BSM")
+logging.basicConfig(level=logging.INFO)
 
 
 class BSM:
@@ -10,28 +14,55 @@ class BSM:
         self.spot = None
         self.strike = None
         self.maturity = None
-        self.interest_rate = None
+        self.risk_free = None
         self.volatility = None
         self._d1 = None
         self._d2 = None
+        self._initialized = False
 
-    def initialize_bsm(self, spot: float, strike: float, maturity: int, interest_rate: float, volatility: float):
+    def initialize_bsm(self, spot: float, strike: float, maturity: float, risk_free_rate: float, volatility: float) -> None:
         """
-
+        Initialize the Black-Sholes-Merton (BSM) model to compute European call/put option pricing.
+        Args:
+            spot (float): Current spot price (in $).
+            strike (float): Strike price (i.e. exercise price) of the option (in $).
+            maturity (float): Time to option expiration (in years).
+            risk_free_rate (float): Annualized risk-free interest rate (e.g., .05 for 5%).
+            volatility (float): Implied volatility of the underlying asset (e.g., .20 for 20%).
+        Returns:
+            None: Updates the internal attributes of the model.
         """
+        logger.info("---------------------------------------------------------------------")
+        logger.info(" Initialization of Black-Sholes-Merton model to compute option prices")
+        logger.info("---------------------------------------------------------------------")
+        logger.info(" Parameters :")
+        logger.info(f"\n"
+                    f"| Spot price: ${spot:.2f} |\n"
+                    f"| Strike: ${strike:.2f} |\n"
+                    f"| Maturity: {maturity} year(s) |\n"
+                    f"| Risk-free rate: {risk_free_rate:.2%} |\n"
+                    f"| Volatility: {volatility / 100:.2%} |"
+                    )
         self.spot = spot
         self.strike = strike
         self.maturity = maturity
-        self.interest_rate = interest_rate
+        self.risk_free = risk_free_rate
         self.volatility = volatility
-        self._d1 = self._compute_d(self.spot, self.strike, self.interest_rate, self.maturity, self.volatility)
-        self._d2 = self._compute_d(self.spot, self.strike, self.interest_rate, self.maturity, self.volatility, is_d1=False)
-
+        self._d1 = self._compute_d(self.spot, self.strike, self.risk_free, self.maturity, self.volatility)
+        self._d2 = self._compute_d(self.spot, self.strike, self.risk_free, self.maturity, self.volatility,
+                                   is_d1=False)
+        self._initialized = True
 
     @staticmethod
-    def _compute_stochastic_integral(t: float, n: int):
+    def _compute_stochastic_integral(t: float, n: int) -> ndarray[Any, dtype[Any]]:
         """
+        Simulate a stochastic integral using the Euler-Maruyama numerical method.
+        Args:
+            t (float): Time period for the simulation.
+            n (int): Number of time steps in the discretization.
 
+        Return:
+            np.ndarray: A 1D array of simulated values representing the stochastic process.
         """
         dt = t / n
 
@@ -43,16 +74,34 @@ class BSM:
         """
 
         """
-        s = self.spot * np.exp((self.interest_rate - self.volatility ** 2 / 2) + self.volatility * self._compute_stochastic_integral(self.maturity, 1000))
+        s = self.spot * np.exp(
+            (self.risk_free - .5 * self.volatility ** 2) + self.volatility * self._compute_stochastic_integral(
+                self.maturity, 1000))
         return s
 
-    def compute_option_price(self):
+    def compute_option_price(self) -> tuple[float, float]:
         """
+        Compute the prices of European call/put options using the Black-Scholes-Merton model.
 
+        Returns:
+            tuple[float, float]: Tuple containing:
+                - Call option price (float)
+                - Put option price (float)
         """
-        call = self.spot * norm.cdf(self._d1) - self.strike * np.exp(-self.interest_rate * self.maturity) * norm.cdf(self._d2)
-        put = self.strike * np.exp(-self.interest_rate * self.maturity) * norm.cdf(-self._d2) - self.spot * norm.cdf(-self._d1)
-        return call, put
+        if not self._initialized:
+            logger.error("Model not initialized. Please initialize a model with the required parameters.")
+        else:
+            call = self.spot * norm.cdf(self._d1) - self.strike * np.exp(
+                -self.risk_free * self.maturity) * norm.cdf(self._d2)
+            put = self.strike * np.exp(-self.risk_free * self.maturity) * norm.cdf(
+                -self._d2) - self.spot * norm.cdf(-self._d1)
+            logger.info("---------------------------------------------------------------------")
+            logger.info(" Result :")
+            logger.info(
+                f"| Call price: ${call:.2f} \n"
+                f"| Put price: ${put:.2f} \n"
+            )
+            return call, put
 
     def simulate_spot_price(self, N: int):
         """
@@ -64,7 +113,7 @@ class BSM:
         return S
 
     @staticmethod
-    def _compute_d(s0: float, K: float, r: float, T: int, sigma: float, is_d1=True):
+    def _compute_d(s0: float, K: float, r: float, T: float, sigma: float, is_d1=True) -> float:
         """
 
         """
@@ -74,7 +123,7 @@ class BSM:
         else:
             return d1 - sigma * np.sqrt(T)
 
-    def compute_bsm(self, s0: float, K: float, r: float, T: int, sigma: float, is_call=True):
+    def compute_bsm(self, s0: float, K: float, r: float, T: float, sigma: float, is_call=True) -> float:
         """
 
         """
