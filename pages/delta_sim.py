@@ -20,7 +20,7 @@ def create_delta_sim_layout():
             html.H3("Option Inputs", style={"color": "rgb(255, 255, 255)"}),
             html.Hr(),
             html.H6("Spot:", style={"color": "rgb(255, 255, 255)"}),
-            dbc.Input(id="spot_input", type="number", placeholder="TEST"),
+            dbc.Input(id="spot_input", type="number"),
             html.Br(),
             html.H6("Strike:", style={"color": "rgb(255, 255, 255)"}),
             dbc.Input(id="strike_input", type="number"),
