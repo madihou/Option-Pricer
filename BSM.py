@@ -140,8 +140,15 @@ class BSM:
         else:
             return K * np.exp(-r * T) * norm.cdf(-d2) - s0 * norm.cdf(-d1)
 
-    def compute_greeks(self):
-        pass
+    def compute_greeks(self, s0: float | np.ndarray, K: float, r: float, T: float | np.ndarray, sigma: float, is_call=True):
+        delta = self.compute_delta(s0, K, r, T, sigma, is_call)
+        gamma = self.compute_gamma(s0, K, r, T, sigma)
+        theta = self.compute_theta(s0, K, r, T, sigma, is_call)
+        vega = self.compute_vega(s0, K, r, T, sigma)
+        rho = self.compute_rho(s0, K, r, T, sigma, is_call)
+
+        return delta, gamma, theta, vega, rho
+
 
     def compute_delta(self, s0: float | np.ndarray, K: float, r: float, T: float | np.ndarray, sigma: float, is_call=True):
         d1 = self._compute_d(s0, K, self.maturity - T, r, sigma)
@@ -150,14 +157,25 @@ class BSM:
         else:
             return norm.cdf(d1) - 1
 
-    def compute_gamma(self):
-        pass
+    def compute_gamma(self, s0: float | np.ndarray, K: float, r: float, T: float | np.ndarray, sigma: float):
+        d1 = self._compute_d(s0, K, self.maturity - T, r, sigma)
+        return norm.pdf(d1) / (s0 * sigma * np.sqrt(T))
 
-    def compute_theta(self):
-        pass
+    def compute_theta(self, s0: float | np.ndarray, K: float, r: float, T: float | np.ndarray, sigma: float, is_call=True):
+        d1 = self._compute_d(s0, K, r, T, sigma)
+        d2 = self._compute_d(s0, K, r, T, sigma, False)
+        if is_call:
+            return -(s0*norm.pdf(d1) * sigma)/(2 * np.sqrt(T)) - r * K * np.exp(-r * T) * norm.cdf(d2)
+        else:
+            return -(s0*norm.pdf(d1) * sigma)/(2 * np.sqrt(T)) + r * K * np.exp(-r * T) * norm.cdf(-d2)
 
-    def compute_vega(self):
-        pass
+    def compute_vega(self, s0: float | np.ndarray, K: float, r: float, T: float | np.ndarray, sigma: float):
+        d1 = self._compute_d(s0, K, r, T, sigma)
+        return s0 * np.sqrt(T) * norm.pdf(d1)
 
-    def compute_rho(self):
-        pass
+    def compute_rho(self, s0: float | np.ndarray, K: float, r: float, T: float | np.ndarray, sigma: float, is_call=True):
+        d2 = self._compute_d(s0, K, r, T, sigma, False)
+        if is_call:
+            return K * T * np.exp(-r * T) * norm.cdf(d2)
+        else:
+            return - K * T * np.exp(-r * T) * norm.cdf(-d2)

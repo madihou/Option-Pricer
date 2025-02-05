@@ -17,49 +17,53 @@ def create_delta_sim_layout():
 
     sidebar_layout = [
         html.Div([
-            html.H3("Option Inputs"),
+            html.H3("Option Inputs", style={"color": "rgb(255, 255, 255)"}),
             html.Hr(),
-            html.H6("Spot:"),
+            html.H6("Spot:", style={"color": "rgb(255, 255, 255)"}),
             dbc.Input(id="spot_input", type="number", placeholder="TEST"),
             html.Br(),
-            html.H6("Strike:"),
+            html.H6("Strike:", style={"color": "rgb(255, 255, 255)"}),
             dbc.Input(id="strike_input", type="number"),
             html.Br(),
-            html.H6("Maturity:"),
+            html.H6("Maturity:", style={"color": "rgb(255, 255, 255)"}),
             dbc.Input(id="maturity_input", type="number"),
             html.Br(),
-            html.H6("Risk-free rate:"),
+            html.H6("Risk-free rate:", style={"color": "rgb(255, 255, 255)"}),
             dbc.Input(id="rate_input", type="number", max=1, min=0, step=.01),
             html.Br(),
-            html.H6("Volatility:"),
+            html.H6("Volatility:", style={"color": "rgb(255, 255, 255)"}),
             dcc.Slider(id="volatility_slider", value=0, min=0, max=100,
                        tooltip={"always_visible": True, "template": "{value}%"}),
-
-            html.H6("Option type:"),
-            dcc.RadioItems(["Call", "Put"], "Call", inline=True, id="option_type"),
+            html.H6("Option type:", style={"color": "rgb(255, 255, 255)"}),
+            dcc.RadioItems(["Call", "Put"], "Call", inline=True, id="option_type", style={"color": "rgb(255, 255, 255)"}),
             html.Hr(),
-            html.H3("∆ Hedge Simulation Parameters"),
+            html.H3("∆ Hedge Simulation Parameters", style={"color": "rgb(255, 255, 255)"}),
             html.Br(),
-            html.H6("Number of shares:"),
+            html.H6("Number of shares:", style={"color": "rgb(255, 255, 255)"}),
             dbc.Input(id="shares_input", type="number"),
             html.Br(),
-            html.H6("Timescale:"),
-            dcc.RadioItems(["Daily", "Weekly"], "Daily", inline=True, id="hedging_timescale"),
+            html.H6("Timescale:", style={"color": "rgb(255, 255, 255)"}),
+            dcc.RadioItems(["Daily", "Weekly"], "Daily", inline=True, id="hedging_timescale", style={"color": "rgb(255, 255, 255)"}),
             html.Br(),
-            html.H6(id="hedging_timescale_text"),
+            html.H6(id="hedging_timescale_text", style={"color": "rgb(255, 255, 255)"}),
             dbc.Input(id="simulation_period_input", type="number"),
+            html.Br(),
             dbc.Button(id="run_button", children="Run Simulation!")
         ])
     ]
 
     content_layout = [
         html.Br(),
-        dmc.Group([
-            dmc.Text("Spot price simulation."),
-            dmc.Space(w=1000),
-            dmc.ActionIcon(DashIconify(icon="material-symbols:forward-media", width=20), variant="filled", size="lg", id="reload")
-        ]),
-        dcc.Graph(id="spot_simulation"),
+        dbc.Card([
+            dbc.CardBody([
+                dmc.Group([
+                    html.H6("Spot price simulation", style={"color": "rgb(255, 255, 255)"}),
+                    dmc.ActionIcon(DashIconify(icon="material-symbols:forward-media", width=20), variant="filled", size="lg", id="reload")
+                ]),
+                html.Br(),
+                dcc.Graph(id="spot_simulation", config={"displayModeBar": False})
+            ])
+        ], color="#302e32"),
         html.Br(),
         html.Div(id="simulation_result")
     ]
@@ -148,7 +152,6 @@ def update_spot_simulation(period: int, timescale: str, option_type: str, n_shar
     _df = create_hedging_df(bsm, period, n_shares, is_call)
     _df.rename(columns={"index": scale_names[timescale]}, inplace=True)
 
-
     return fig, _df.to_dict("records")
 
 
@@ -172,7 +175,7 @@ def draw_spot_simulation(spot: list[np.array], period: int):
             y=spot
         )
     )
-    spot_fig.update_layout(template="plotly_white")
+    spot_fig.update_layout(template="plotly_dark", paper_bgcolor="#302e32", plot_bgcolor="#302e32", margin=dict(l=10, r=10, t=20, b=20))
     return spot_fig
 
 

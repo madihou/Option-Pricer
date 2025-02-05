@@ -6,7 +6,7 @@ SIDEBAR_STYLE = {
     "width": "17rem",
     "height": "100%",
     "padding": "2rem 1rem",
-    "background-color": "#f8f9fa",
+    "background-color": "#302e32",
     "overflow-x": "auto"
 }
 
@@ -15,7 +15,9 @@ CONTENT_STYLE = {
     "top": 0,
     "left": 0,
     "bottom": 0,
-    "margin-left": "18rem",
-    "margin-right": "2rem",
+    "margin-left": "17rem",
+    "margin-right": "0rem",
+    "margin-bottom": "0rem",
     "padding": "2rem 1rem",
+    "background-color": "#28292E"
 }

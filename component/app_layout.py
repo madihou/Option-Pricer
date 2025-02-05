@@ -10,8 +10,8 @@ sidebar = html.Div(
 
 content = html.Div(
     [
-        html.H3("Option Pricer", className="display-5"),
-        html.Hr(),
+        html.H3("Option Pricer", className="display-5", style={"color": "rgb(255, 255, 255)"}),
+        html.Hr(style={"color": "#d703d7", "border": "none", "border-radius": "10px", "border-top": "3px solid #d703d7", "width": "100%"}),
         dcc.Tabs([
             dcc.Tab(label="Pricer", id="theoretical_tab", value="pricer"),
             dcc.Tab(label="Greeks", id="greeks", value="greeks"),
