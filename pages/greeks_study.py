@@ -85,7 +85,7 @@ def run_greeks(s0, K, T, r, sigma, option_type, _):
 
 def draw_greeks_plot(greeks: pd.DataFrame):
     title = ["∆", "Γ", "Θ", "V", "Ρ"]
-    greeks_plot = make_subplots(rows=3, cols=2, subplot_titles=title)
+    greeks_plot = make_subplots(rows=3, cols=2)
     s = 0
     for j in range(2):
         for i in range(3):
